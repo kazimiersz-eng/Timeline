@@ -1,213 +1,932 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cronograma PAU - Filosofía</title>
-    <style>
-        :root {
-            --bg-color: #fcfcf9;
-            --primary-text: #2d3436;
-            --secondary-text: #636e72;
-            --accent-main: #6c5ce7;
-            --accent-secondary: #b2bec3;
-            --border-color: #dfe6e9;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma PAU · Filosofía</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #09090f;
+  --surface: #111118;
+  --surface2: #1a1a24;
+  --border: rgba(255,255,255,0.06);
+  --text: #ddd9d0;
+  --dim: #5a5750;
+  --mid: #9a9590;
 
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            color: var(--primary-text);
-        }
+  --pau: #d4a853;
+  --pau-glow: rgba(212,168,83,0.25);
+  --pau-bg: rgba(212,168,83,0.08);
 
-        .container {
-            position: relative;
-            width: 1000px;
-            padding: 40px;
-            min-height: 1600px;
-        }
+  --sec: #6b9bb8;
+  --sec-glow: rgba(107,155,184,0.2);
+  --sec-bg: rgba(107,155,184,0.08);
 
-        /* Eje Cronológico */
-        .timeline-line {
-            position: absolute;
-            left: 50px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--border-color);
-        }
+  --pre: #7bab82;
+  --pre-glow: rgba(123,171,130,0.2);
+  --pre-bg: rgba(123,171,130,0.08);
 
-        /* Nodos */
-        .node {
-            position: absolute;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+  --era-antig: #9b7ec8;
+  --era-med: #6b9bb8;
+  --era-mod: #d4a853;
+  --era-cont: #c97b6e;
+}
 
-        /* Estilo Principal (Los 6 autores clave) */
-        .node-main {
-            border: 2px solid var(--accent-main);
-            min-width: 200px;
-            z-index: 10;
-        }
-        .node-main .name { font-weight: 800; font-size: 1.1rem; color: var(--accent-main); }
-        .node-main:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.2); }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Estilo Secundario (Autores entre paréntesis) */
-        .node-secondary {
-            border: 1px solid var(--accent-secondary);
-            min-width: 160px;
-            padding: 8px 15px;
-            opacity: 0.8;
-        }
-        .node-secondary .name { font-weight: 600; font-size: 0.9rem; color: var(--secondary-text); }
-        .node-secondary:hover { opacity: 1; transform: translateY(-2px); }
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+}
 
-        .date { font-size: 0.8rem; color: #95a5a6; margin-top: 2px; }
+/* ── grain overlay ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.6;
+}
 
-        /* Modal / Popup */
-        #modal-overlay {
-            display: none;
-            position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(2px);
-            z-index: 100;
-        }
+/* ── HEADER ── */
+#header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(9,9,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+  gap: 12px;
+}
 
-        #info-card {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 420px;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            z-index: 101;
-            border: 1px solid var(--border-color);
-        }
+.h-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--text);
+}
+.h-title em { font-style: italic; color: var(--pau); }
 
-        .card-type { 
-            font-size: 0.7rem; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            padding: 4px 10px; 
-            border-radius: 50px; 
-            margin-bottom: 10px; 
-            display: inline-block;
-        }
-        .type-main { background: #efecfd; color: var(--accent-main); }
-        .type-secondary { background: #f1f2f6; color: var(--secondary-text); }
+.h-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-        h2 { margin: 0; color: #2d3436; font-size: 1.8rem; }
-        .card-years { color: #b2bec3; font-size: 0.9rem; margin-bottom: 20px; display: block; }
-        
-        .section { margin-bottom: 15px; }
-        .section-label { font-size: 0.75rem; font-weight: bold; color: #b2bec3; text-transform: uppercase; }
-        .section-content { font-size: 0.95rem; line-height: 1.5; margin-top: 4px; }
+.view-toggle {
+  display: flex;
+  background: var(--surface2);
+  border-radius: 7px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  gap: 2px;
+}
+.vbtn {
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  border-radius: 5px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.vbtn.active { background: var(--surface); color: var(--text); }
 
-        .close-btn { 
-            position: absolute; top: 20px; right: 20px; 
-            background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #b2bec3;
-        }
-    </style>
+.sep { width: 1px; height: 20px; background: var(--border); }
+
+.chip {
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--dim);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.chip.on-pau  { border-color: rgba(212,168,83,.4); color: var(--pau); background: var(--pau-bg); }
+.chip.on-sec  { border-color: rgba(107,155,184,.35); color: var(--sec); background: var(--sec-bg); }
+.chip.on-pre  { border-color: rgba(123,171,130,.35); color: var(--pre); background: var(--pre-bg); }
+
+/* ── CANVAS ── */
+#canvas-wrap {
+  position: fixed;
+  inset: 52px 0 0 0;
+  cursor: grab;
+}
+#canvas-wrap:active { cursor: grabbing; }
+canvas { display: block; width: 100%; height: 100%; }
+
+/* ── LEGEND floating ── */
+#legend {
+  position: fixed;
+  bottom: 20px;
+  right: 20px; /* Movido a la derecha para no tapar el final de la línea temporal */
+  background: rgba(9,9,15,0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.leg-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--mid); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.leg-era { width: 12px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+.leg-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+/* ── HINT ── */
+#hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--dim);
+  background: rgba(9,9,15,0.7);
+  backdrop-filter: blur(8px);
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── DETAIL PANEL ── */
+#panel {
+  position: fixed;
+  top: 52px; right: 0; bottom: 0;
+  width: 340px;
+  background: rgba(11,11,18,0.96);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid var(--border);
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+}
+#panel.open { transform: translateX(0); }
+
+.p-head {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.p-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.p-close:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+
+.p-tipo { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
+.p-tipo.pau { color: var(--pau); }
+.p-tipo.sec { color: var(--sec); }
+.p-tipo.pre { color: var(--pre); }
+
+.p-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+.p-name.pau { color: var(--pau); }
+.p-name.sec { color: var(--sec); }
+.p-name.pre { color: var(--pre); }
+
+.p-meta { font-size: 12px; color: var(--dim); }
+
+.p-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.p-section { margin-bottom: 18px; }
+.p-label {
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 6px;
+}
+.p-text { font-size: 13px; color: var(--mid); line-height: 1.65; }
+.p-divider { height: 1px; background: var(--border); margin: 4px 0 18px; }
+
+.inf-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.inf-pill {
+  font-size: 11px; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--mid); cursor: pointer; transition: all .15s;
+}
+.inf-pill:hover { color: var(--text); border-color: rgba(255,255,255,.18); }
+.inf-pill.pau { border-color: rgba(212,168,83,.35); color: var(--pau); }
+.inf-pill.sec { border-color: rgba(107,155,184,.3); color: var(--sec); }
+.inf-pill.pre { border-color: rgba(123,171,130,.3); color: var(--pre); }
+
+/* ── TIMELINE VIEW ── */
+#view-tl {
+  position: fixed;
+  inset: 52px 0 0 0;
+  overflow-y: auto;
+  display: none;
+  padding: 0 0 60px;
+}
+
+.tl-era {
+  padding: 28px 28px 4px 28px;
+  position: relative;
+}
+.tl-era::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+.tl-era.Antigua::before  { background: var(--era-antig); }
+.tl-era.Medieval::before { background: var(--era-med); }
+.tl-era.Moderna::before  { background: var(--era-mod); }
+.tl-era.Contemp::before  { background: var(--era-cont); }
+
+.tl-era-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-style: italic;
+  opacity: .45;
+  margin-bottom: 16px;
+  letter-spacing: .04em;
+}
+.tl-era.Antigua  .tl-era-label { color: var(--era-antig); }
+.tl-era.Medieval .tl-era-label { color: var(--era-med); }
+.tl-era.Moderna  .tl-era-label { color: var(--era-mod); }
+.tl-era.Contemp  .tl-era-label { color: var(--era-cont); }
+
+.tl-card {
+  display: flex; gap: 12px; margin-bottom: 10px;
+  cursor: pointer; max-width: 680px;
+}
+.tl-card:hover .tl-inner { border-color: rgba(255,255,255,.12); transform: translateX(3px); }
+
+.tl-dot-col { display: flex; flex-direction: column; align-items: center; padding-top: 13px; flex-shrink: 0; width: 16px; }
+.tl-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid; flex-shrink: 0; }
+.tl-dot.pau { border-color: var(--pau); background: var(--pau-bg); }
+.tl-dot.sec { border-color: var(--sec); background: var(--sec-bg); }
+.tl-dot.pre { border-color: var(--pre); background: var(--pre-bg); }
+
+.tl-inner {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 11px 15px; transition: all .18s;
+}
+.tl-inner.pau { border-left: 2px solid rgba(212,168,83,.4); }
+.tl-inner.sec { border-left: 2px solid rgba(107,155,184,.35); }
+.tl-inner.pre { border-left: 2px solid rgba(123,171,130,.35); }
+.tl-inner.selected.pau { background: var(--pau-bg); border-color: rgba(212,168,83,.45); }
+.tl-inner.selected.sec { background: var(--sec-bg); border-color: rgba(107,155,184,.4); }
+.tl-inner.selected.pre { background: var(--pre-bg); border-color: rgba(123,171,130,.4); }
+
+.tl-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
+.tl-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; }
+.tl-name.pau { color: var(--pau); }
+.tl-name.sec { color: var(--text); }
+.tl-name.pre { color: var(--pre); }
+.tl-dates { font-size: 11px; color: var(--dim); }
+.pau-badge { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--pau); border: 1px solid rgba(212,168,83,.4); padding: 1px 6px; border-radius: 999px; }
+.tl-ctx { font-size: 12px; color: var(--mid); line-height: 1.5; margin-top: 3px; }
+.tl-ideas { font-size: 11px; color: var(--dim); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
 </head>
 <body>
 
-<div class="container">
-    <div class="timeline-line"></div>
-    <div id="nodes-container"></div>
+<div id="header">
+  <div class="h-title">Cronograma <em>PAU</em> · Filosofía</div>
+  <div class="h-controls">
+    <div class="view-toggle">
+      <button class="vbtn active" id="vbtn-graph" onclick="setView('graph')">◎ Red de influencias</button>
+      <button class="vbtn" id="vbtn-tl" onclick="setView('tl')">⏱ Eje temporal</button>
+    </div>
+    <div class="sep"></div>
+    <button class="chip on-pau" id="chip-pau" onclick="toggleFilter('pau')">★ PAU</button>
+    <button class="chip on-sec" id="chip-sec" onclick="toggleFilter('sec')">Secundarios</button>
+    <button class="chip on-pre" id="chip-pre" onclick="toggleFilter('pre')">Presocráticos</button>
+  </div>
 </div>
 
-<div id="modal-overlay"></div>
-<div id="info-card">
-    <button class="close-btn" onclick="closeModal()">&times;</button>
-    <div id="card-type-tag" class="card-type"></div>
-    <h2 id="m-name"></h2>
-    <span id="m-years" class="card-years"></span>
-    
-    <div class="section">
-        <div class="section-label">Contexto Histórico</div>
-        <div id="m-context" class="section-content"></div>
+<div id="canvas-wrap">
+  <canvas id="gc"></canvas>
+</div>
+
+<div id="view-tl"></div>
+
+<div id="legend">
+  <div class="leg-row"><div class="leg-dot" style="background:var(--pau)"></div>Principal PAU</div>
+  <div class="leg-row"><div class="leg-dot" style="background:var(--sec)"></div>Secundario</div>
+  <div class="leg-row"><div class="leg-dot" style="background:var(--pre)"></div>Presocrático</div>
+  <div class="leg-divider"></div>
+  <div class="leg-row"><div class="leg-era" style="background:var(--era-antig)"></div>Antigua</div>
+  <div class="leg-row"><div class="leg-era" style="background:var(--era-med)"></div>Medieval</div>
+  <div class="leg-row"><div class="leg-era" style="background:var(--era-mod)"></div>Moderna</div>
+  <div class="leg-row"><div class="leg-era" style="background:var(--era-cont)"></div>Contemporánea</div>
+</div>
+
+<div id="hint">Arrastra · Rueda para zoom · Clic para detalles</div>
+
+<div id="panel">
+  <div class="p-head">
+    <button class="p-close" onclick="closePanel()">✕</button>
+    <div class="p-tipo" id="p-tipo"></div>
+    <div class="p-name" id="p-name"></div>
+    <div class="p-meta" id="p-meta"></div>
+  </div>
+  <div class="p-body">
+    <div class="p-section">
+      <div class="p-label">Contexto histórico</div>
+      <div class="p-text" id="p-ctx"></div>
     </div>
-    <div class="section">
-        <div class="section-label">Ideas Doctrinales</div>
-        <div id="m-ideas" class="section-content"></div>
+    <div class="p-divider"></div>
+    <div class="p-section">
+      <div class="p-label">Ideas principales</div>
+      <div class="p-text" id="p-ideas"></div>
     </div>
-    <div class="section">
-        <div class="section-label">Influencia</div>
-        <div id="m-influence" class="section-content"></div>
+    <div class="p-divider"></div>
+    <div class="p-section" id="s-recv">
+      <div class="p-label">Influencias recibidas</div>
+      <div class="inf-list" id="p-recv"></div>
     </div>
+    <div class="p-section" id="s-gives">
+      <div class="p-label">Influye en</div>
+      <div class="inf-list" id="p-gives"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-    const data = [
-        { name: "PLATÓN", isMain: true, years: "427–347 a.C.", top: 40, left: 100, context: "Crisis de la polis ateniense tras la Guerra del Peloponeso y condena de Sócrates.", ideas: "Teoría de las Ideas (mundo sensible vs. inteligible). Política en La República. Dualismo alma-cuerpo.", influence: "Base del pensamiento filosófico occidental. Influye en Agustín." },
-        { name: "Aristóteles", isMain: false, years: "384–322 a.C.", top: 110, left: 350, context: "Macedonia y expansión de Alejandro Magno.", ideas: "Lógica formal. Ética de la virtud. Observación empírica.", influence: "Base de la ciencia medieval. Fundamental en Tomás de Aquino." },
-        { name: "Agustín de Hipona", isMain: false, years: "354–430", top: 220, left: 100, context: "Caída del Imperio romano y expansión del cristianismo.", ideas: "Interioridad. Confesiones. Ciudad de Dios. Síntesis platonismo-cristianismo.", influence: "Filosofía cristiana medieval." },
-        { name: "Avicena", isMain: false, years: "980–1037", top: 300, left: 350, context: "Edad de oro del mundo islámico.", ideas: "Ser necesario vs. ser contingente. Psicología racional.", influence: "Impacto en la metafísica medieval." },
-        { name: "San Anselmo", isMain: false, years: "1033–1109", top: 380, left: 100, context: "Consolidación Iglesia medieval.", ideas: "Argumento ontológico de la existencia de Dios.", influence: "Debates sobre fe y razón." },
-        { name: "Averroes", isMain: false, years: "1126–1198", top: 460, left: 350, context: "Al-Ándalus.", ideas: "Comentarios a Aristóteles. Autonomía de la razón.", influence: "Transmisión de Aristóteles a Europa." },
-        { name: "Averroísmo Latino", isMain: false, years: "S. XIII", top: 540, left: 550, context: "Auge universidades medievales.", ideas: "Unidad del intelecto. Autonomía de la filosofía.", influence: "Debates en la escolástica." },
-        { name: "TOMÁS DE AQUINO", isMain: true, years: "1225–1274", top: 620, left: 100, context: "Universidades medievales y redescubrimiento de Aristóteles.", ideas: "Cinco vías. Síntesis fe-razón. Ley natural.", influence: "Filosofía oficial de la Iglesia." },
-        { name: "DESCARTES", isMain: true, years: "1596–1650", top: 730, left: 100, context: "Revolución científica y crisis del aristotelismo.", ideas: "Duda metódica. Cogito ergo sum. Dualismo.", influence: "Padre de la modernidad." },
-        { name: "Hobbes", isMain: false, years: "1588–1679", top: 810, left: 350, context: "Guerras civiles inglesas.", ideas: "Leviatán. Contrato social por seguridad.", influence: "Realismo político." },
-        { name: "LOCKE", isMain: true, years: "1632–1704", top: 890, left: 100, context: "Revolución Gloriosa inglesa.", ideas: "Empirismo (tabula rasa). Derechos naturales (Vida, Libertad, Propiedad).", influence: "Liberalismo político." },
-        { name: "Rousseau", isMain: false, years: "1712–1778", top: 970, left: 350, context: "Ilustración francesa.", ideas: "Voluntad general. El buen salvaje.", influence: "Revolución Francesa." },
-        { name: "Kant", isMain: false, years: "1724–1804", top: 1050, left: 350, context: "Ilustración alemana.", ideas: "Imperativo categórico. Giro copernicano.", influence: "Filosofía crítica moderna." },
-        { name: "Hegel", isMain: false, years: "1770–1831", top: 1130, left: 350, context: "Era napoleónica.", ideas: "Dialéctica. El Espíritu en la historia.", influence: "Idealismo alemán." },
-        { name: "MARX", isMain: true, years: "1818–1883", top: 1220, left: 100, context: "Revolución Industrial y capitalismo.", ideas: "Materialismo histórico. Lucha de clases. Plusvalía.", influence: "Comunismo y sociología." },
-        { name: "Nietzsche", isMain: false, years: "1844–1900", top: 1300, left: 350, context: "Crisis de valores europea.", ideas: "Superhombre. Voluntad de poder. Muerte de Dios.", influence: "Existencialismo." },
-        { name: "Freud", isMain: false, years: "1856–1939", top: 1380, left: 350, context: "Nacimiento de la psicología.", ideas: "Inconsciente. Psicoanálisis.", influence: "Cultura contemporánea." },
-        { name: "ARENDT", isMain: true, years: "1906–1975", top: 1470, left: 100, context: "Totalitarismos y postguerra.", ideas: "Banalidad del mal. Acción política. Vita activa.", influence: "Filosofía política actual." }
-    ];
+// ═══════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════
+const PH = [
+  {id:"tales",    name:"Tales de Mileto",    tipo:"pre", era:"Antigua",  nac:-624, dates:"c.624–546 a.C.", ctx:"Mileto, colonia griega en Asia Menor. Primer pensamiento racional.", ideas:"El agua como arché. Geometría práctica. Eclipse predicho en 585 a.C.", recv:[], gives:["pitagoras","heraclito","platon"]},
+  {id:"pitagoras",name:"Pitágoras",          tipo:"pre", era:"Antigua",  nac:-570, dates:"c.570–490 a.C.", ctx:"Samos y Crotona. Comunidades religiosas pitagóricas.", ideas:"El número como arché. Armonía matemática del cosmos. Transmigración del alma.", recv:["tales"], gives:["platon"]},
+  {id:"heraclito",name:"Heráclito",          tipo:"pre", era:"Antigua",  nac:-540, dates:"c.540–480 a.C.", ctx:"Éfeso. Tensiones entre las polis griegas.", ideas:"El fuego como arché. El logos universal. 'Todo fluye' (panta rhei).", recv:["tales"], gives:["platon","hegel","marx"]},
+  {id:"parmenides",name:"Parménides",        tipo:"pre", era:"Antigua",  nac:-515, dates:"c.515–450 a.C.", ctx:"Elea, Italia meridional.", ideas:"El ser es; el no-ser no es. La razón frente a los sentidos. Unidad del ser.", recv:[], gives:["platon"]},
+  {id:"democrito",name:"Demócrito",          tipo:"pre", era:"Antigua",  nac:-460, dates:"c.460–370 a.C.", ctx:"Abdera. Período clásico griego.", ideas:"Atomismo: todo formado por átomos indivisibles y el vacío.", recv:[], gives:["aristoteles"]},
+  {id:"platon",   name:"Platón",             tipo:"pau", era:"Antigua",  nac:-427, dates:"427–347 a.C.",   ctx:"Crisis de la polis ateniense tras la G. del Peloponeso. Condena de Sócrates.", ideas:"Teoría de las Ideas. La República. Dualismo alma-cuerpo. Amor platónico.", recv:["pitagoras","parmenides"], gives:["aristoteles","agustin"]},
+  {id:"aristoteles",name:"Aristóteles",      tipo:"sec", era:"Antigua",  nac:-384, dates:"384–322 a.C.",   ctx:"Macedonia y expansión helenística de Alejandro Magno.", ideas:"Lógica formal. Ética de la virtud (eudemonía). Empirismo. Metafísica.", recv:["platon","democrito"], gives:["averroes","tomas"]},
+  {id:"agustin",  name:"Agustín de Hipona",  tipo:"sec", era:"Medieval", nac:354,  dates:"354–430",        ctx:"Caída del Imperio Romano. Expansión y consolidación del cristianismo.", ideas:"Interioridad del alma. Confesiones. Ciudad de Dios. Síntesis platonismo-cristianismo.", recv:["platon"], gives:["anselmo","tomas"]},
+  {id:"avicena",  name:"Avicena",            tipo:"sec", era:"Medieval", nac:980,  dates:"980–1037",       ctx:"Edad de oro del mundo islámico.", ideas:"Ser necesario vs. contingente. Psicología racional. Canon de Medicina.", recv:["aristoteles"], gives:["tomas"]},
+  {id:"anselmo",  name:"San Anselmo",        tipo:"sec", era:"Medieval", nac:1033, dates:"1033–1109",      ctx:"Consolidación de la Iglesia y las grandes abadías medievales.", ideas:"Argumento ontológico: Dios es aquello mayor de lo cual nada puede pensarse.", recv:["agustin"], gives:["tomas"]},
+  {id:"averroes", name:"Averroes",           tipo:"sec", era:"Medieval", nac:1126, dates:"1126–1198",      ctx:"Al-Ándalus en su esplendor cultural.", ideas:"Comentarios a Aristóteles. Autonomía de la razón frente a la fe.", recv:["aristoteles"], gives:["tomas"]},
+  {id:"tomas",    name:"Tomás de Aquino",    tipo:"pau", era:"Medieval", nac:1225, dates:"1225–1274",      ctx:"Universidades medievales. Redescubrimiento de Aristóteles vía Averroes.", ideas:"Cinco vías para la existencia de Dios. Síntesis fe-razón. Ley natural y eterna.", recv:["aristoteles","agustin","avicena","averroes"], gives:["descartes"]},
+  {id:"descartes",name:"Descartes",          tipo:"pau", era:"Moderna",  nac:1596, dates:"1596–1650",      ctx:"Revolución científica (Galileo, Kepler). Crisis del aristotelismo escolástico.", ideas:"Duda metódica. Cogito ergo sum. Dualismo res cogitans/res extensa.", recv:["tomas"], gives:["locke"]},
+  {id:"hobbes",   name:"Hobbes",             tipo:"sec", era:"Moderna",  nac:1588, dates:"1588–1679",      ctx:"Guerras civiles inglesas. Crisis de la monarquía inglesa.", ideas:"Leviatán. Estado de naturaleza hobbesiano. Contrato social por seguridad.", recv:[], gives:["locke"]},
+  {id:"locke",    name:"Locke",              tipo:"pau", era:"Moderna",  nac:1632, dates:"1632–1704",      ctx:"Revolución Gloriosa inglesa (1688). Ascenso de la burguesía.", ideas:"Empirismo (tabula rasa). Derechos naturales: Vida, Libertad, Propiedad.", recv:["descartes","hobbes"], gives:["rousseau","kant","marx"]},
+  {id:"rousseau", name:"Rousseau",           tipo:"sec", era:"Moderna",  nac:1712, dates:"1712–1778",      ctx:"Ilustración francesa. Prerrevolucionario.", ideas:"Voluntad general. El buen salvaje. Contrato social republicano.", recv:["locke"], gives:["kant","marx"]},
+  {id:"kant",     name:"Kant",               tipo:"sec", era:"Moderna",  nac:1724, dates:"1724–1804",      ctx:"Ilustración alemana.", ideas:"Imperativo categórico. Giro copernicano. Crítica de la Razón Pura.", recv:["locke","rousseau"], gives:["hegel","marx"]},
+  {id:"hegel",    name:"Hegel",              tipo:"sec", era:"Moderna",  nac:1770, dates:"1770–1831",      ctx:"Era napoleónica y Restauración.", ideas:"Dialéctica (tesis-antítesis-síntesis). Fenomenología del Espíritu.", recv:["kant","heraclito"], gives:["marx"]},
+  {id:"marx",     name:"Marx",               tipo:"pau", era:"Contemp",  nac:1818, dates:"1818–1883",      ctx:"Revolución Industrial. Consolidación del capitalismo europeo.", ideas:"Materialismo histórico. Lucha de clases. Plusvalía. El Capital.", recv:["locke","rousseau","hegel","heraclito"], gives:["arendt"]},
+  {id:"nietzsche",name:"Nietzsche",          tipo:"sec", era:"Contemp",  nac:1844, dates:"1844–1900",      ctx:"Crisis de valores en la Europa finisecular.", ideas:"Superhombre. Voluntad de poder. Muerte de Dios. Eterno retorno.", recv:[], gives:["arendt"]},
+  {id:"freud",    name:"Freud",              tipo:"sec", era:"Contemp",  nac:1856, dates:"1856–1939",      ctx:"Nacimiento de la psicología y psiquiatría modernas.", ideas:"Inconsciente. Psicoanálisis. El yo, el ello y el superyó.", recv:[], gives:["arendt"]},
+  {id:"arendt",   name:"Hannah Arendt",      tipo:"pau", era:"Contemp",  nac:1906, dates:"1906–1975",      ctx:"Totalitarismos del s. XX, Holocausto y guerra fría.", ideas:"Banalidad del mal. Acción política. Vita activa. Orígenes del totalitarismo.", recv:["marx","nietzsche","freud"], gives:[]},
+];
 
-    const container = document.getElementById('nodes-container');
+const ERA_ORDER  = ["Antigua","Medieval","Moderna","Contemp"];
+const ERA_LABEL  = {Antigua:"Filosofía Antigua",Medieval:"Filosofía Medieval",Moderna:"Filosofía Moderna",Contemp:"Filosofía Contemporánea"};
+const ERA_COL    = {Antigua:"#9b7ec8",Medieval:"#6b9bb8",Moderna:"#d4a853",Contemp:"#c97b6e"};
+const TYPE_COL   = {pau:"#d4a853",sec:"#6b9bb8",pre:"#7bab82"};
+const TYPE_GLOW  = {pau:"rgba(212,168,83,0.3)",sec:"rgba(107,155,184,0.25)",pre:"rgba(123,171,130,0.25)"};
 
-    data.forEach(p => {
-        const div = document.createElement('div');
-        div.className = `node ${p.isMain ? 'node-main' : 'node-secondary'}`;
-        div.style.top = `${p.top}px`;
-        div.style.left = `${p.left}px`;
-        div.innerHTML = `<span class="name">${p.name}</span><span class="date">${p.years}</span>`;
-        div.onclick = () => openModal(p);
-        container.appendChild(div);
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+const filters = {pau:true, sec:true, pre:true};
+let selectedId = null;
+let currentView = 'graph';
+
+// graph camera
+let camX = 0, camY = 0, camZ = 1;
+let dragging = false, dragSX, dragSY, camSX, camSY;
+let hoveredId = null;
+
+// node positions (set in layout)
+const nodePos = {}; // id -> {x,y}
+
+// ═══════════════════════════════════════
+//  FILTERS
+// ═══════════════════════════════════════
+function visible(p) {
+  return filters[p.tipo];
+}
+
+function toggleFilter(t) {
+  filters[t] = !filters[t];
+  const cls = {pau:'on-pau',sec:'on-sec',pre:'on-pre'};
+  document.getElementById('chip-'+t).classList.toggle(cls[t], filters[t]);
+  layoutGraph();
+  render();
+  if (currentView==='tl') buildTL();
+}
+
+// ═══════════════════════════════════════
+//  VIEW SWITCH
+// ═══════════════════════════════════════
+function setView(v) {
+  currentView = v;
+  document.getElementById('vbtn-graph').classList.toggle('active', v==='graph');
+  document.getElementById('vbtn-tl').classList.toggle('active', v==='tl');
+  document.getElementById('canvas-wrap').style.display = v==='graph'?'':'none';
+  document.getElementById('view-tl').style.display = v==='tl'?'block':'none';
+  document.getElementById('hint').style.display = v==='graph'?'':'none';
+  if (v==='tl') buildTL();
+  if (v==='graph') render();
+}
+
+// ═══════════════════════════════════════
+//  GRAPH LAYOUT
+// ═══════════════════════════════════════
+function layoutGraph() {
+  const cw = document.getElementById('canvas-wrap');
+  const W = cw.clientWidth, H = cw.clientHeight;
+
+  // Era columns: evenly spaced
+  const eraVis = ERA_ORDER.filter(e => PH.some(p=>p.era===e&&visible(p)));
+  const colW = W / (eraVis.length + 1);
+  const eraX = {};
+  eraVis.forEach((e,i) => eraX[e] = colW * (i+1));
+
+  const yearMin = -650, yearMax = 1980;
+  const padT = 40, padB = 40;
+
+  PH.forEach(p => {
+    if (!visible(p)) return;
+    const t = (p.nac - yearMin) / (yearMax - yearMin);
+    const y = padT + t * (H - padT - padB);
+    
+    // horizontal scatter within era column to avoid overlap
+    const seed = Math.sin(p.nac * 13.7 + p.id.charCodeAt(0) * 0.3);
+    let scatter = seed * 55;
+
+    // Ajustes manuales para evitar amontonamientos
+    if (p.id === 'tales') scatter = -75;
+    if (p.id === 'pitagoras') scatter = 75;
+    if (p.id === 'heraclito') scatter = -25;
+    if (p.id === 'parmenides') scatter = 40;
+    if (p.id === 'democrito') scatter = 0;
+
+    if (p.id === 'descartes') scatter = -70;
+    if (p.id === 'locke') scatter = 70;
+    if (p.id === 'hobbes') scatter = 0;
+    if (p.id === 'rousseau') scatter = -40;
+
+    nodePos[p.id] = { x: (eraX[p.era]||W/2) + scatter, y };
+  });
+}
+
+// ═══════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════
+const canvas = document.getElementById('gc');
+const ctx = canvas.getContext('2d');
+let dpr = window.devicePixelRatio || 1;
+let W, H;
+
+function resize() {
+  const cw = document.getElementById('canvas-wrap');
+  W = cw.clientWidth; H = cw.clientHeight;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W+'px';
+  canvas.style.height = H+'px';
+  layoutGraph();
+  render();
+}
+
+function worldToScreen(wx,wy) {
+  return { x: wx*camZ + camX, y: wy*camZ + camY };
+}
+function screenToWorld(sx,sy) {
+  return { x: (sx - camX)/camZ, y: (sy - camY)/camZ };
+}
+
+function render() {
+  if (currentView !== 'graph') return;
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,W,H);
+
+  // draw era bands (background columns)
+  drawEraBands();
+
+  // draw era year markers
+  drawYearAxis();
+
+  // draw edges
+  drawEdges();
+
+  // draw nodes
+  drawNodes();
+
+  ctx.restore();
+}
+
+function drawEraBands() {
+  const eraVis = ERA_ORDER.filter(e => PH.some(p=>p.era===e&&visible(p)));
+  if (!eraVis.length) return;
+
+  // find x ranges per era
+  eraVis.forEach(era => {
+    const nodes = PH.filter(p=>p.era===era&&visible(p)).map(p=>nodePos[p.id]).filter(Boolean);
+    if (!nodes.length) return;
+    const xs = nodes.map(n=>n.x);
+    const minX = Math.min(...xs) - 70;
+    const maxX = Math.max(...xs) + 70;
+
+    const s1 = worldToScreen(minX, 0);
+    const s2 = worldToScreen(maxX, H);
+
+    const col = ERA_COL[era];
+    ctx.save();
+    ctx.globalAlpha = 0.04;
+    ctx.fillStyle = col;
+    ctx.fillRect(s1.x, 0, s2.x-s1.x, H);
+    ctx.restore();
+
+    // era label at top
+    const sm = worldToScreen((minX+maxX)/2, 20);
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = col;
+    ctx.font = `italic 11px 'Cormorant Garamond', serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(ERA_LABEL[era], sm.x, sm.y + 10);
+    ctx.restore();
+  });
+}
+
+function drawYearAxis() {
+  // draw subtle year labels on left
+  const yearMin = -650, yearMax = 1980;
+  const years = [-600,-400,-200,0,500,1000,1200,1400,1600,1800,1900];
+  const padT = 40, padB = 40;
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = '#888';
+  ctx.font = `9px 'Outfit', sans-serif`;
+  ctx.textAlign = 'left';
+  years.forEach(y => {
+    const t = (y-yearMin)/(yearMax-yearMin);
+    const wy = padT + t*(H-padT-padB);
+    const s = worldToScreen(0, wy);
+    ctx.fillText(y<0?`${Math.abs(y)} a.C.`:y+'', 6, s.y+3);
+  });
+  ctx.restore();
+}
+
+function drawEdges() {
+  PH.forEach(p => {
+    if (!visible(p)) return;
+    const fp = nodePos[p.id]; if(!fp) return;
+    p.gives.forEach(tid => {
+      const tp = PH.find(x=>x.id===tid);
+      if (!tp||!visible(tp)) return;
+      const tp2 = nodePos[tid]; if(!tp2) return;
+
+      const isHighlighted = selectedId && (p.id===selectedId || tid===selectedId);
+      const isConnected = hoveredId && (p.id===hoveredId || tid===hoveredId);
+      const alpha = selectedId
+        ? (isHighlighted ? 0.65 : 0.04)
+        : (hoveredId ? (isConnected?0.55:0.07) : 0.15);
+
+      const sf = worldToScreen(fp.x, fp.y);
+      const st = worldToScreen(tp2.x, tp2.y);
+      const col = TYPE_COL[p.tipo];
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = isHighlighted||isConnected ? col : '#777';
+      ctx.lineWidth = isHighlighted ? 1.8 : 0.9;
+      ctx.setLineDash([5,4]);
+
+      // curved bezier
+      const mx = (sf.x+st.x)/2 - 18;
+      const my = (sf.y+st.y)/2;
+      ctx.beginPath();
+      ctx.moveTo(sf.x, sf.y);
+      ctx.quadraticCurveTo(mx, my, st.x, st.y);
+      ctx.stroke();
+
+      // arrowhead
+      if (isHighlighted||isConnected) {
+        ctx.setLineDash([]);
+        ctx.globalAlpha = alpha;
+        const t2 = 0.88;
+        const ax = (1-t2)*(1-t2)*sf.x + 2*(1-t2)*t2*mx + t2*t2*st.x;
+        const ay = (1-t2)*(1-t2)*sf.y + 2*(1-t2)*t2*my + t2*t2*st.y;
+        const ang = Math.atan2(st.y-ay, st.x-ax);
+        const as = 7;
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.moveTo(st.x, st.y);
+        ctx.lineTo(st.x - as*Math.cos(ang-0.42), st.y - as*Math.sin(ang-0.42));
+        ctx.lineTo(st.x - as*Math.cos(ang+0.42), st.y - as*Math.sin(ang+0.42));
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
     });
+  });
+}
 
-    function openModal(p) {
-        document.getElementById('m-name').innerText = p.name;
-        document.getElementById('m-years').innerText = p.years;
-        document.getElementById('m-context').innerText = p.context;
-        document.getElementById('m-ideas').innerText = p.ideas;
-        document.getElementById('m-influence').innerText = p.influence;
-        
-        const tag = document.getElementById('card-type-tag');
-        tag.innerText = p.isMain ? "Autor Principal (PAU)" : "Autor Secundario / Contexto";
-        tag.className = `card-type ${p.isMain ? 'type-main' : 'type-secondary'}`;
+function drawNodes() {
+  PH.forEach(p => {
+    if (!visible(p)) return;
+    const pos = nodePos[p.id]; if(!pos) return;
+    const s = worldToScreen(pos.x, pos.y);
+    const isSelected = p.id === selectedId;
+    const isHovered  = p.id === hoveredId;
+    const isFaded = (selectedId && !isSelected) || (hoveredId && !isHovered && !selectedId);
 
-        document.getElementById('modal-overlay').style.display = 'block';
-        document.getElementById('info-card').style.display = 'block';
+    const col = TYPE_COL[p.tipo];
+    const glow = TYPE_GLOW[p.tipo];
+    const r = p.tipo==='pau' ? 16 : 11;
+
+    ctx.save();
+    ctx.globalAlpha = isFaded ? 0.2 : 1;
+
+    // glow
+    if (isSelected || isHovered) {
+      ctx.shadowColor = col;
+      ctx.shadowBlur = isSelected ? 22 : 14;
     }
 
-    function closeModal() {
-        document.getElementById('modal-overlay').style.display = 'none';
-        document.getElementById('info-card').style.display = 'none';
+    // circle fill
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, r*camZ, 0, Math.PI*2);
+    if (isSelected||isHovered) {
+      ctx.fillStyle = col;
+    } else {
+      ctx.fillStyle = '#111118';
+    }
+    ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = isSelected ? 2.5 : 1.5;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // inner dot for non-selected PAU
+    if (p.tipo==='pau' && !isSelected && !isHovered) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, 3.5*camZ, 0, Math.PI*2);
+      ctx.fillStyle = col;
+      ctx.globalAlpha = isFaded ? 0.2 : 0.5;
+      ctx.fill();
     }
 
-    document.getElementById('modal-overlay').onclick = closeModal;
+    ctx.globalAlpha = isFaded ? 0.15 : 1;
+
+    // name label
+    const short = p.name.split(' ')[0] === 'San' ? p.name.split(' ').slice(0,2).join(' ') : p.name.split(' ')[0];
+    const fullNeeded = p.name.includes('Hipona') || p.name.includes('Aquino') || p.name.includes('Hannah');
+    const label = fullNeeded ? p.name : short;
+
+    const fs = Math.max(8, Math.min(13, 11*camZ));
+    ctx.font = `${p.tipo==='pau'?'500':'400'} ${fs}px 'Outfit', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = isSelected||isHovered ? '#09090f' : col;
+    ctx.fillText(label, s.x, s.y + fs*0.36);
+
+    // date below node
+    if (!isFaded) {
+      const dateFs = Math.max(7, Math.min(10, 9*camZ));
+      ctx.font = `${dateFs}px 'Outfit', sans-serif`;
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillText(p.dates, s.x, s.y + r*camZ + dateFs + 2);
+    }
+
+    ctx.restore();
+  });
+}
+
+// ═══════════════════════════════════════
+//  EVENTS
+// ═══════════════════════════════════════
+function getNodeAt(sx, sy) {
+  let best = null, bestD = Infinity;
+  PH.forEach(p => {
+    if (!visible(p)) return;
+    const pos = nodePos[p.id]; if(!pos) return;
+    const s = worldToScreen(pos.x, pos.y);
+    const r = (p.tipo==='pau'?16:11)*camZ + 5;
+    const d = Math.hypot(sx-s.x, sy-s.y);
+    if (d < r && d < bestD) { bestD=d; best=p; }
+  });
+  return best;
+}
+
+const cw = document.getElementById('canvas-wrap');
+
+cw.addEventListener('mousedown', e => {
+  dragging = true;
+  dragSX = e.clientX; dragSY = e.clientY;
+  camSX = camX; camSY = camY;
+});
+
+cw.addEventListener('mousemove', e => {
+  const rect = cw.getBoundingClientRect();
+  const sx = e.clientX - rect.left;
+  const sy = e.clientY - rect.top;
+
+  if (dragging) {
+    camX = camSX + (e.clientX - dragSX);
+    camY = camSY + (e.clientY - dragSY);
+    render(); return;
+  }
+
+  const node = getNodeAt(sx, sy);
+  const prev = hoveredId;
+  hoveredId = node?.id || null;
+  cw.style.cursor = hoveredId ? 'pointer' : 'grab';
+  if (hoveredId !== prev) render();
+});
+
+cw.addEventListener('mouseup', e => {
+  const moved = Math.hypot(e.clientX-dragSX, e.clientY-dragSY);
+  dragging = false;
+  if (moved < 5) {
+    const rect = cw.getBoundingClientRect();
+    const node = getNodeAt(e.clientX-rect.left, e.clientY-rect.top);
+    if (node) openPanel(node.id);
+    else closePanel();
+  }
+});
+
+cw.addEventListener('mouseleave', () => { dragging=false; });
+
+cw.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = cw.getBoundingClientRect();
+  const mx = e.clientX-rect.left, my = e.clientY-rect.top;
+  const factor = e.deltaY > 0 ? 0.88 : 1.14;
+  const newZ = Math.max(0.25, Math.min(4, camZ*factor));
+  camX = mx - (mx-camX)*(newZ/camZ);
+  camY = my - (my-camY)*(newZ/camZ);
+  camZ = newZ;
+  render();
+}, {passive:false});
+
+// touch
+let t0 = null;
+cw.addEventListener('touchstart', e => {
+  if(e.touches.length===1){ dragging=true; t0={x:e.touches[0].clientX,y:e.touches[0].clientY}; camSX=camX;camSY=camY; }
+});
+cw.addEventListener('touchmove', e => {
+  if(dragging&&e.touches.length===1){ camX=camSX+(e.touches[0].clientX-t0.x); camY=camSY+(e.touches[0].clientY-t0.y); render(); }
+});
+cw.addEventListener('touchend', e => {
+  if(t0&&Math.hypot(e.changedTouches[0].clientX-t0.x,e.changedTouches[0].clientY-t0.y)<8){
+    const rect=cw.getBoundingClientRect();
+    const node=getNodeAt(e.changedTouches[0].clientX-rect.left,e.changedTouches[0].clientY-rect.top);
+    if(node)openPanel(node.id); else closePanel();
+  }
+  dragging=false;
+});
+
+window.addEventListener('resize', resize);
+
+// ═══════════════════════════════════════
+//  PANEL
+// ═══════════════════════════════════════
+function openPanel(id) {
+  const p = PH.find(x=>x.id===id); if(!p) return;
+  selectedId = id;
+
+  const tipoLabel = {pau:'★ Principal PAU', sec:'Secundario', pre:'Presocrático'};
+  document.getElementById('p-tipo').textContent = tipoLabel[p.tipo];
+  document.getElementById('p-tipo').className = 'p-tipo '+p.tipo;
+  document.getElementById('p-name').textContent = p.name;
+  document.getElementById('p-name').className = 'p-name '+p.tipo;
+  document.getElementById('p-meta').textContent = p.dates + ' · ' + ERA_LABEL[p.era];
+  document.getElementById('p-ctx').textContent = p.ctx;
+  document.getElementById('p-ideas').textContent = p.ideas;
+
+  function fillList(elId, ids, nameList) {
+    const el = document.getElementById(elId);
+    el.innerHTML = '';
+    // try to link by id first, then by name string
+    const items = ids.length ? ids : [];
+    if (!items.length && nameList) {
+      // fallback name list rendered as plain chips
+      nameList.forEach(n=>{
+        const chip=document.createElement('span');
+        chip.className='inf-pill'; chip.textContent=n; el.appendChild(chip);
+      });
+      return;
+    }
+    items.forEach(tid=>{
+      const tp=PH.find(x=>x.id===tid);
+      const chip=document.createElement('span');
+      chip.className='inf-pill'+(tp?' '+tp.tipo:'');
+      chip.textContent=tp?tp.name:tid;
+      if(tp) chip.onclick=()=>openPanel(tp.id);
+      el.appendChild(chip);
+    });
+  }
+
+  fillList('p-recv', p.recv, []);
+  fillList('p-gives', p.gives, []);
+
+  document.getElementById('s-recv').style.display = p.recv.length?'':'none';
+  document.getElementById('s-gives').style.display = p.gives.length?'':'none';
+
+  document.getElementById('panel').classList.add('open');
+  if(currentView==='tl') buildTL();
+  render();
+}
+
+function closePanel() {
+  selectedId = null;
+  document.getElementById('panel').classList.remove('open');
+  if(currentView==='tl') buildTL();
+  render();
+}
+
+// ═══════════════════════════════════════
+//  TIMELINE
+// ═══════════════════════════════════════
+function buildTL() {
+  const el = document.getElementById('view-tl');
+  el.innerHTML = '';
+  ERA_ORDER.forEach(era => {
+    const plist = PH.filter(p=>p.era===era&&visible(p)).sort((a,b)=>a.nac-b.nac);
+    if(!plist.length) return;
+    const sec=document.createElement('div');
+    sec.className='tl-era '+era;
+
+    const head=document.createElement('div');
+    head.className='tl-era-label'; head.textContent=ERA_LABEL[era];
+    sec.appendChild(head);
+
+    plist.forEach(p=>{
+      const card=document.createElement('div'); card.className='tl-card';
+      const sel = selectedId===p.id;
+      card.innerHTML=`
+        <div class="tl-dot-col"><div class="tl-dot ${p.tipo}"></div></div>
+        <div class="tl-inner ${p.tipo}${sel?' selected':''}">
+          <div class="tl-row">
+            <span class="tl-name ${p.tipo}">${p.name}</span>
+            <span class="tl-dates">${p.dates}</span>
+            ${p.tipo==='pau'?'<span class="pau-badge">PAU</span>':''}
+          </div>
+          <div class="tl-ctx">${p.ctx}</div>
+          <div class="tl-ideas">${p.ideas}</div>
+        </div>`;
+      card.onclick=()=>openPanel(p.id);
+      sec.appendChild(card);
+    });
+    el.appendChild(sec);
+  });
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+resize();
+// center graph initially
+function centerGraph() {
+  const vis = PH.filter(visible);
+  if(!vis.length) return;
+  const xs = vis.map(p=>nodePos[p.id]?.x||0);
+  const ys = vis.map(p=>nodePos[p.id]?.y||0);
+  const cx = (Math.min(...xs)+Math.max(...xs))/2;
+  const cy = (Math.min(...ys)+Math.max(...ys))/2;
+  camX = W/2 - cx*camZ;
+  camY = H/2 - cy*camZ;
+  render();
+}
+centerGraph();
 </script>
-
 </body>
 </html>
